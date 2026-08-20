@@ -252,7 +252,7 @@ async function payNow() {
     try {
 
         let response = await fetch(
-            "https://nyota-funds-backend.onrender.com/stk-push",
+            "https://nyota-program-backend.onrender.com/stk-push",
             {
                 method: "POST",
 
@@ -346,7 +346,7 @@ async function checkPayment(
 
                 let response =
                     await fetch(
-                        "https://nyota-funds-backend.onrender.com/payment-status",
+                        "https://nyota-program-backend.onrender.com/payment-status",
                         {
                             method: "POST",
 
