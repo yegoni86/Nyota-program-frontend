@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NYOTA FUNDS</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:16px 10px;
+    font-family:Arial,sans-serif;
+    background:#ffffff;
+    color:#222;
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+}
+
+.card{
+    width:100%;
+    background:#ffffff;
+    padding:24px 20px;
+    border-radius:18px;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,0.08);
+
+    border:1px solid #e5e5e5;
+    text-align:center;
+}
+
+.success{
+    width:64px;
+    height:64px;
+    margin:0 auto 15px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#eaf8ef;
+    color:#16803c;
+
+    font-size:34px;
+    font-weight:700;
+}
+
+h1{
+    color:#16445b;
+    font-size:23px;
+    font-weight:700;
+    margin:5px 0 18px;
+}
+
+p{
+    color:#555;
+    font-size:14px;
+    line-height:1.6;
+    margin:12px 0;
+}
+
+p b{
+    color:#16445b;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:18px;
+
+    border:none;
+    border-radius:11px;
+
+    background:#125d83;
+    color:#fff;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 8px 20px rgba(18,93,131,0.18);
+
+    transition:
+        background .2s ease,
+        transform .1s ease;
+}
+
+button:hover{
+    background:#0d4d6d;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+@media(max-width:360px){
+
+    body{
+        padding:10px 7px;
+    }
+
+    .card{
+        padding:20px 15px;
+        border-radius:15px;
+    }
+
+    h1{
+        font-size:21px;
+    }
+
+    button{
+        padding:14px;
+        font-size:15px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<div class="success">✓</div>
+
+<h1>Payment Successful</h1>
+
+<p>
+Congratulations <b><span id="name"></span></b>!
+</p>
+
+<p>
+Your payment has been received successfully.
+</p>
+
+<p>
+Your NYOTA FUNDS request has been submitted successfully.
+</p>
+
+<p>
+Our team is verifying your application. You will receive further communication after verification is complete.
+</p>
+
+<button onclick="finish()">
+Finish
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let applicant =
+    localStorage.getItem("applicantName") ||
+    localStorage.getItem("fullName");
+
+document.getElementById("name").textContent =
+    applicant || "Applicant";
+
+function finish(){
+
+    alert(
+        "Thank you for choosing NYOTA FUNDS."
+    );
+
+}
+
+</script>
+
+</body>
+</html>
